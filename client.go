@@ -150,6 +150,10 @@ type Client struct {
 	// the client will disconnect.
 	PrePairCallback func(jid types.JID, platform, businessName string) bool
 
+	// RawNodeHook is called for every incoming XMPP node before it is processed by internal handlers.
+	// If the hook returns true, the node is considered handled and will NOT be processed further.
+	RawNodeHook func(node *waBinary.Node) bool
+
 	// GetClientPayload is called to get the client payload for connecting to the server.
 	// This should NOT be used for WhatsApp (to change the OS name, update fields in store.BaseClientPayload directly).
 	GetClientPayload func() *waWa6.ClientPayload
@@ -774,6 +778,14 @@ func (cli *Client) handleFrame(ctx context.Context, data []byte) {
 		return
 	}
 	cli.recvLog.Debugf("%s", node.XMLString())
+
+	// Hook for intercepting raw nodes
+	if cli.RawNodeHook != nil {
+		if cli.RawNodeHook(node) {
+			return
+		}
+	}
+
 	if node.Tag == "xmlstreamend" {
 		if !cli.isExpectedDisconnect() {
 			cli.Log.Warnf("Received stream end frame")

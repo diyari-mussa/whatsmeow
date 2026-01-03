@@ -99,6 +99,14 @@ func (int *DangerousInternalClient) SetTransport(transport *http.Transport, opt 
 	int.c.setTransport(transport, opt)
 }
 
+func (int *DangerousInternalClient) SendNode(ctx context.Context, node waBinary.Node) error {
+	return int.c.sendNode(ctx, node)
+}
+
+func (int *DangerousInternalClient) SendNodeAndGetData(ctx context.Context, node waBinary.Node) ([]byte, error) {
+	return int.c.sendNodeAndGetData(ctx, node)
+}
+
 func (int *DangerousInternalClient) GetSocketWaitChan() <-chan struct{} {
 	return int.c.getSocketWaitChan()
 }
@@ -153,14 +161,6 @@ func (int *DangerousInternalClient) HandleFrame(ctx context.Context, data []byte
 
 func (int *DangerousInternalClient) HandlerQueueLoop(evtCtx, connCtx context.Context) {
 	int.c.handlerQueueLoop(evtCtx, connCtx)
-}
-
-func (int *DangerousInternalClient) SendNodeAndGetData(ctx context.Context, node waBinary.Node) ([]byte, error) {
-	return int.c.sendNodeAndGetData(ctx, node)
-}
-
-func (int *DangerousInternalClient) SendNode(ctx context.Context, node waBinary.Node) error {
-	return int.c.sendNode(ctx, node)
 }
 
 func (int *DangerousInternalClient) DispatchEvent(evt any) (handlerFailed bool) {
